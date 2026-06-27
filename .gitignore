@@ -1,0 +1,50 @@
+# ===== .NET =====
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.userprefs
+*.csproj.user
+launchSettings.json
+appsettings.Development.json
+
+# EF Core migrations backup
+*.dbml
+
+# Publish output
+publish/
+out/
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+
+# ===== Vue / Node =====
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Vite
+.vite/
+
+# TypeScript
+*.tsbuildinfo
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== Editor =====
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ===== Secrets =====
+*.pfx
+*.key
+secrets.json
