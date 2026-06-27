@@ -28,6 +28,27 @@ public class SchedulesController(IMediator mediator) : ControllerBase
         return Ok(id);
     }
 
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetScheduleById(Guid id)
+    {
+        var result = await mediator.Send(new GetScheduleByIdQuery(id, UserId));
+        return Ok(result);
+    }
+
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> UpdateSchedule(Guid id, UpdateScheduleCommand cmd)
+    {
+        await mediator.Send(cmd with { ScheduleId = id, UserId = UserId });
+        return Ok();
+    }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeleteSchedule(Guid id)
+    {
+        await mediator.Send(new DeleteScheduleCommand(id, UserId));
+        return NoContent();
+    }
+
     [HttpPost("{id:guid}/publish")]
     public async Task<IActionResult> PublishSchedule(Guid id)
     {

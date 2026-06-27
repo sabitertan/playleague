@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using PlayLeague.Api.Data;
 using PlayLeague.Api.Middleware;
 using PlayLeague.Api.Services;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,13 +54,12 @@ if (app.Environment.IsDevelopment())
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await DbSeeder.SeedAsync(db);
+
+    app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseMiddleware<ExceptionMiddleware>();
-
-if (app.Environment.IsDevelopment())
-    app.MapOpenApi();
-
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();

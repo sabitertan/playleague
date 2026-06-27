@@ -17,6 +17,13 @@ public class LeaguesController(IMediator mediator) : ControllerBase
 {
     private Guid UserId => Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
+    [HttpGet]
+    public async Task<IActionResult> GetLeagues()
+    {
+        var result = await mediator.Send(new GetLeaguesQuery(UserId));
+        return Ok(result);
+    }
+
     [HttpPost]
     public async Task<IActionResult> CreateLeague(CreateLeagueCommand cmd)
     {
@@ -38,6 +45,13 @@ public class LeaguesController(IMediator mediator) : ControllerBase
         return Ok();
     }
 
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeleteLeague(Guid id)
+    {
+        await mediator.Send(new DeleteLeagueCommand(id, UserId));
+        return NoContent();
+    }
+
     [HttpGet("{id:guid}/teams")]
     public async Task<IActionResult> GetLeagueTeams(Guid id)
     {
@@ -52,11 +66,39 @@ public class LeaguesController(IMediator mediator) : ControllerBase
         return Ok();
     }
 
+    [HttpGet("{id:guid}/divisions")]
+    public async Task<IActionResult> GetDivisions(Guid id)
+    {
+        var result = await mediator.Send(new GetDivisionsQuery(id, UserId));
+        return Ok(result);
+    }
+
     [HttpPost("{id:guid}/divisions")]
     public async Task<IActionResult> CreateDivision(Guid id, CreateDivisionCommand cmd)
     {
         var divisionId = await mediator.Send(cmd with { LeagueId = id, UserId = UserId });
         return Ok(divisionId);
+    }
+
+    [HttpGet("{id:guid}/divisions/{divisionId:guid}")]
+    public async Task<IActionResult> GetDivisionById(Guid id, Guid divisionId)
+    {
+        var result = await mediator.Send(new GetDivisionByIdQuery(divisionId, UserId));
+        return Ok(result);
+    }
+
+    [HttpPut("{id:guid}/divisions/{divisionId:guid}")]
+    public async Task<IActionResult> UpdateDivision(Guid id, Guid divisionId, UpdateDivisionCommand cmd)
+    {
+        await mediator.Send(cmd with { DivisionId = divisionId, UserId = UserId });
+        return Ok();
+    }
+
+    [HttpDelete("{id:guid}/divisions/{divisionId:guid}")]
+    public async Task<IActionResult> DeleteDivision(Guid id, Guid divisionId)
+    {
+        await mediator.Send(new DeleteDivisionCommand(divisionId, UserId));
+        return NoContent();
     }
 
     [HttpPost("{id:guid}/messages")]
@@ -71,6 +113,27 @@ public class LeaguesController(IMediator mediator) : ControllerBase
     {
         var result = await mediator.Send(new GetMessagesQuery(id, UserId, page, pageSize));
         return Ok(result);
+    }
+
+    [HttpGet("{id:guid}/messages/{messageId:guid}")]
+    public async Task<IActionResult> GetMessageById(Guid id, Guid messageId)
+    {
+        var result = await mediator.Send(new GetMessageByIdQuery(id, messageId, UserId));
+        return Ok(result);
+    }
+
+    [HttpPut("{id:guid}/messages/{messageId:guid}")]
+    public async Task<IActionResult> UpdateMessage(Guid id, Guid messageId, UpdateMessageCommand cmd)
+    {
+        await mediator.Send(cmd with { LeagueId = id, MessageId = messageId, UserId = UserId });
+        return Ok();
+    }
+
+    [HttpDelete("{id:guid}/messages/{messageId:guid}")]
+    public async Task<IActionResult> DeleteMessage(Guid id, Guid messageId)
+    {
+        await mediator.Send(new DeleteMessageCommand(id, messageId, UserId));
+        return NoContent();
     }
 
     [HttpGet("{id:guid}/audit")]

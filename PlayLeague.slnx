@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/backend/">
+    <Project Path="backend/PlayLeague.Api.csproj" />
+  </Folder>
+  <Folder Name="/frontend/">
+    <Project Path="frontend/frontend.esproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/PlayLeague.Tests/PlayLeague.Tests.csproj" />
+  </Folder>
+</Solution>

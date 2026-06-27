@@ -28,6 +28,13 @@ public class InvitationsController(IMediator mediator) : ControllerBase
         return Ok();
     }
 
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> CancelInvitation(Guid id)
+    {
+        await mediator.Send(new CancelInvitationCommand(id, UserId));
+        return NoContent();
+    }
+
     [HttpPost("accept/{token}")]
     [AllowAnonymous]
     public async Task<IActionResult> AcceptInvitation(string token)

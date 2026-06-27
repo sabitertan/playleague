@@ -31,6 +31,19 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     protected override void OnModelCreating(ModelBuilder m)
     {
+        // Store all enums as strings
+        m.Entity<TeamMember>().Property(e => e.Role).HasConversion<string>();
+        m.Entity<LeagueUser>().Property(e => e.Role).HasConversion<string>();
+        m.Entity<Event>().Property(e => e.Type).HasConversion<string>();
+        m.Entity<Invitation>().Property(e => e.Status).HasConversion<string>();
+        m.Entity<GameSchedule>().Property(e => e.Status).HasConversion<string>();
+        m.Entity<Venue>().Property(e => e.Visibility).HasConversion<string>();
+        m.Entity<Venue>().Property(e => e.ProfileStatus).HasConversion<string>();
+        m.Entity<AuditLog>().Property(e => e.Severity).HasConversion<string>();
+        m.Entity<LeagueMessage>().Property(e => e.MessageType).HasConversion<string>();
+        m.Entity<LeagueMessage>().Property(e => e.Priority).HasConversion<string>();
+        m.Entity<MessageRecipient>().Property(e => e.DeliveryStatus).HasConversion<string>();
+
         m.Entity<User>().HasIndex(u => u.Email).IsUnique();
         m.Entity<Invitation>().HasIndex(i => i.Token).IsUnique();
         m.Entity<Venue>().HasIndex(v => v.Slug).IsUnique();

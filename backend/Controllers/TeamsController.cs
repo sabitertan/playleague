@@ -72,6 +72,13 @@ public class TeamsController(IMediator mediator) : ControllerBase
         return Ok();
     }
 
+    [HttpGet("{id:guid}/roster/{playerId:guid}")]
+    public async Task<IActionResult> GetPlayerById(Guid id, Guid playerId)
+    {
+        var result = await mediator.Send(new GetPlayerByIdQuery(playerId, UserId));
+        return Ok(result);
+    }
+
     [HttpDelete("{id:guid}/roster/{playerId:guid}")]
     public async Task<IActionResult> RemovePlayer(Guid id, Guid playerId)
     {
