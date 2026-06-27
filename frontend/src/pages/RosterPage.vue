@@ -12,6 +12,11 @@ const showAddForm = ref(false)
 const addError = ref('')
 const addLoading = ref(false)
 
+const editingPlayerId = ref<string | null>(null)
+const editPlayer = ref<PlayerData>({ name: '', jerseyNumber: '', position: '', email: '' })
+const editLoading = ref(false)
+const editError = ref('')
+
 const newPlayer = ref<PlayerData>({
   name: '',
   jerseyNumber: '',
@@ -36,6 +41,36 @@ async function handleAddPlayer() {
     addError.value = err?.response?.data?.message ?? 'Failed to add player.'
   } finally {
     addLoading.value = false
+  }
+}
+
+function startEditPlayer(player: typeof rosterStore.players[0]) {
+  editingPlayerId.value = player.id
+  editPlayer.value = {
+    name: player.name,
+    jerseyNumber: player.jerseyNumber ?? '',
+    position: player.position ?? '',
+    email: player.email ?? '',
+  }
+  editError.value = ''
+}
+
+function cancelEditPlayer() {
+  editingPlayerId.value = null
+  editError.value = ''
+}
+
+async function handleUpdatePlayer() {
+  if (!teamsStore.currentTeam || !editingPlayerId.value) return
+  editError.value = ''
+  editLoading.value = true
+  try {
+    await rosterStore.updatePlayer(teamsStore.currentTeam.id, editingPlayerId.value, editPlayer.value)
+    editingPlayerId.value = null
+  } catch (err: any) {
+    editError.value = err?.response?.data?.message ?? 'Failed to update player.'
+  } finally {
+    editLoading.value = false
   }
 }
 
@@ -162,32 +197,51 @@ onMounted(async () => {
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
-          <tr
-            v-for="player in rosterStore.players"
-            :key="player.id"
-            class="hover:bg-gray-50 transition-colors"
-          >
-            <td class="px-5 py-3.5 text-sm text-gray-500">
-              {{ player.jerseyNumber ?? '—' }}
-            </td>
-            <td class="px-5 py-3.5 text-sm font-medium text-gray-900">
-              {{ player.name }}
-            </td>
-            <td class="px-5 py-3.5 text-sm text-gray-500 hidden sm:table-cell">
-              {{ player.position ?? '—' }}
-            </td>
-            <td class="px-5 py-3.5 text-sm text-gray-500 hidden md:table-cell">
-              {{ player.email ?? '—' }}
-            </td>
-            <td v-if="isAdmin" class="px-5 py-3.5 text-right">
-              <button
-                @click="handleRemovePlayer(player.id)"
-                class="text-xs text-red-500 hover:text-red-700 font-medium"
-              >
-                Remove
-              </button>
-            </td>
-          </tr>
+          <template v-for="player in rosterStore.players" :key="player.id">
+            <!-- View row -->
+            <tr v-if="editingPlayerId !== player.id" class="hover:bg-gray-50 transition-colors">
+              <td class="px-5 py-3.5 text-sm text-gray-500">{{ player.jerseyNumber ?? '—' }}</td>
+              <td class="px-5 py-3.5 text-sm font-medium text-gray-900">{{ player.name }}</td>
+              <td class="px-5 py-3.5 text-sm text-gray-500 hidden sm:table-cell">{{ player.position ?? '—' }}</td>
+              <td class="px-5 py-3.5 text-sm text-gray-500 hidden md:table-cell">{{ player.email ?? '—' }}</td>
+              <td v-if="isAdmin" class="px-5 py-3.5 text-right">
+                <button @click="startEditPlayer(player)" class="text-xs text-blue-500 hover:text-blue-700 font-medium mr-3">Edit</button>
+                <button @click="handleRemovePlayer(player.id)" class="text-xs text-red-500 hover:text-red-700 font-medium">Remove</button>
+              </td>
+            </tr>
+            <!-- Edit row -->
+            <tr v-else class="bg-blue-50">
+              <td class="px-3 py-2">
+                <input v-model="editPlayer.jerseyNumber" type="text" placeholder="#"
+                  class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+              </td>
+              <td class="px-3 py-2">
+                <input v-model="editPlayer.name" type="text" required placeholder="Name"
+                  class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+              </td>
+              <td class="px-3 py-2 hidden sm:table-cell">
+                <input v-model="editPlayer.position" type="text" placeholder="Position"
+                  class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+              </td>
+              <td class="px-3 py-2 hidden md:table-cell">
+                <input v-model="editPlayer.email" type="email" placeholder="Email"
+                  class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+              </td>
+              <td class="px-3 py-2 text-right whitespace-nowrap">
+                <span v-if="editError" class="text-xs text-red-600 mr-2">{{ editError }}</span>
+                <button @click="handleUpdatePlayer" :disabled="editLoading"
+                  class="text-xs text-white bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 font-medium px-2.5 py-1 rounded mr-1 transition-colors"
+                >
+                  {{ editLoading ? '…' : 'Save' }}
+                </button>
+                <button @click="cancelEditPlayer" class="text-xs text-gray-600 hover:text-gray-900 font-medium">Cancel</button>
+              </td>
+            </tr>
+          </template>
         </tbody>
       </table>
     </div>

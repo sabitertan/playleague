@@ -30,9 +30,19 @@ const router = createRouter({
           component: () => import('@/pages/DashboardPage.vue'),
         },
         {
+          path: 'teams',
+          name: 'teams',
+          component: () => import('@/pages/TeamsPage.vue'),
+        },
+        {
           path: 'roster',
           name: 'roster',
           component: () => import('@/pages/RosterPage.vue'),
+        },
+        {
+          path: 'coaches',
+          name: 'coaches',
+          component: () => import('@/pages/CoachesPage.vue'),
         },
         {
           path: 'events',
@@ -58,6 +68,11 @@ const router = createRouter({
           path: 'league',
           name: 'league',
           component: () => import('@/pages/LeaguePage.vue'),
+        },
+        {
+          path: 'invitations',
+          name: 'invitations',
+          component: () => import('@/pages/InvitationsPage.vue'),
         },
       ],
     },

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PlayLeague.Api.Data;
@@ -11,9 +12,11 @@ using PlayLeague.Api.Data;
 namespace PlayLeague.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260627205428_AddCoaches")]
+    partial class AddCoaches
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -83,9 +86,6 @@ namespace PlayLeague.Api.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("CreatedById")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("Email")
                         .HasColumnType("text");
 
@@ -96,32 +96,17 @@ namespace PlayLeague.Api.Migrations
                     b.Property<string>("Phone")
                         .HasColumnType("text");
 
+                    b.Property<Guid>("TeamId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Title")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedById");
-
-                    b.ToTable("Coaches");
-                });
-
-            modelBuilder.Entity("PlayLeague.Api.Models.CoachAssignment", b =>
-                {
-                    b.Property<Guid>("CoachId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("TeamId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("AssignedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("CoachId", "TeamId");
-
                     b.HasIndex("TeamId");
 
-                    b.ToTable("CoachAssignments");
+                    b.ToTable("Coaches");
                 });
 
             modelBuilder.Entity("PlayLeague.Api.Models.Division", b =>
@@ -1032,30 +1017,11 @@ namespace PlayLeague.Api.Migrations
 
             modelBuilder.Entity("PlayLeague.Api.Models.Coach", b =>
                 {
-                    b.HasOne("PlayLeague.Api.Models.User", "CreatedBy")
-                        .WithMany()
-                        .HasForeignKey("CreatedById")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CreatedBy");
-                });
-
-            modelBuilder.Entity("PlayLeague.Api.Models.CoachAssignment", b =>
-                {
-                    b.HasOne("PlayLeague.Api.Models.Coach", "Coach")
-                        .WithMany("Assignments")
-                        .HasForeignKey("CoachId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("PlayLeague.Api.Models.Team", "Team")
                         .WithMany()
                         .HasForeignKey("TeamId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Coach");
 
                     b.Navigation("Team");
                 });
@@ -1464,11 +1430,6 @@ namespace PlayLeague.Api.Migrations
                     b.Navigation("League");
 
                     b.Navigation("Team");
-                });
-
-            modelBuilder.Entity("PlayLeague.Api.Models.Coach", b =>
-                {
-                    b.Navigation("Assignments");
                 });
 
             modelBuilder.Entity("PlayLeague.Api.Models.Division", b =>

@@ -62,6 +62,11 @@ async function handleRsvp(eventId: string, status: RsvpStatus) {
   await eventsStore.updateRsvp(eventId, status)
 }
 
+async function handleDeleteEvent(id: string) {
+  if (!confirm('Delete this event?')) return
+  await eventsStore.deleteEvent(id)
+}
+
 onMounted(async () => {
   await teamsStore.fetchTeams()
   if (teamsStore.teams.length > 0) {
@@ -194,7 +199,13 @@ onMounted(async () => {
 
           <!-- Event Details -->
           <div class="flex-1 min-w-0">
-            <h3 class="text-sm font-semibold text-gray-900">{{ event.title }}</h3>
+            <div class="flex items-start justify-between gap-2">
+              <h3 class="text-sm font-semibold text-gray-900">{{ event.title }}</h3>
+              <button v-if="isAdmin" @click="handleDeleteEvent(event.id)"
+                class="text-gray-300 hover:text-red-500 transition-colors text-sm flex-shrink-0"
+                title="Delete event"
+              >✕</button>
+            </div>
             <div class="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-gray-500">
               <span>📅 {{ formatDate(event.date) }}</span>
               <span v-if="event.location">📍 {{ event.location }}</span>

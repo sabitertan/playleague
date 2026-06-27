@@ -1,0 +1,12 @@
+namespace PlayLeague.Api.Models;
+
+public class CoachAssignment
+{
+    public Guid CoachId { get; set; }
+    public Coach Coach { get; set; } = null!;
+
+    public Guid TeamId { get; set; }
+    public Team Team { get; set; } = null!;
+
+    public DateTime AssignedAt { get; set; } = DateTime.UtcNow;
+}

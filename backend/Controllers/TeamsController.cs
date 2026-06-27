@@ -6,6 +6,8 @@ using PlayLeague.Api.Features.Teams.Commands;
 using PlayLeague.Api.Features.Teams.Queries;
 using PlayLeague.Api.Features.Roster.Commands;
 using PlayLeague.Api.Features.Roster.Queries;
+using PlayLeague.Api.Features.Coaches.Commands;
+using PlayLeague.Api.Features.Coaches.Queries;
 
 namespace PlayLeague.Api.Controllers;
 
@@ -83,6 +85,27 @@ public class TeamsController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> RemovePlayer(Guid id, Guid playerId)
     {
         await mediator.Send(new RemovePlayerCommand(playerId, id, UserId));
+        return NoContent();
+    }
+
+    [HttpGet("{id:guid}/coaches")]
+    public async Task<IActionResult> GetTeamCoaches(Guid id)
+    {
+        var result = await mediator.Send(new GetTeamCoachesQuery(id, UserId));
+        return Ok(result);
+    }
+
+    [HttpPost("{id:guid}/coaches")]
+    public async Task<IActionResult> AssignCoach(Guid id, AssignCoachCommand cmd)
+    {
+        await mediator.Send(cmd with { TeamId = id, UserId = UserId });
+        return Ok();
+    }
+
+    [HttpDelete("{id:guid}/coaches/{coachId:guid}")]
+    public async Task<IActionResult> UnassignCoach(Guid id, Guid coachId)
+    {
+        await mediator.Send(new UnassignCoachCommand(id, coachId, UserId));
         return NoContent();
     }
 }

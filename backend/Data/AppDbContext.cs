@@ -1,7 +1,26 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PlayLeague.Api.Models;
 
 namespace PlayLeague.Api.Data;
+
+// Ensures every DateTime is stored as UTC, so writes to 'timestamp with time zone' never fail
+// for Unspecified/Local kinds. Columns stay as timestamptz.
+file sealed class UtcDateTimeConverter : ValueConverter<DateTime, DateTime>
+{
+    public UtcDateTimeConverter() : base(
+        v => v.Kind == DateTimeKind.Local ? v.ToUniversalTime() : DateTime.SpecifyKind(v, DateTimeKind.Utc),
+        v => DateTime.SpecifyKind(v, DateTimeKind.Utc))
+    { }
+}
+
+file sealed class UtcNullableDateTimeConverter : ValueConverter<DateTime?, DateTime?>
+{
+    public UtcNullableDateTimeConverter() : base(
+        v => v.HasValue ? (v.Value.Kind == DateTimeKind.Local ? v.Value.ToUniversalTime() : DateTime.SpecifyKind(v.Value, DateTimeKind.Utc)) : v,
+        v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : v)
+    { }
+}
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
@@ -9,6 +28,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Team> Teams => Set<Team>();
     public DbSet<TeamMember> TeamMembers => Set<TeamMember>();
     public DbSet<Player> Players => Set<Player>();
+    public DbSet<Coach> Coaches => Set<Coach>();
+    public DbSet<CoachAssignment> CoachAssignments => Set<CoachAssignment>();
     public DbSet<Event> Events => Set<Event>();
     public DbSet<Rsvp> Rsvps => Set<Rsvp>();
     public DbSet<Invitation> Invitations => Set<Invitation>();
@@ -28,6 +49,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Play> Plays => Set<Play>();
     public DbSet<PracticeSessionPlay> PracticeSessionPlays => Set<PracticeSessionPlay>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder builder)
+    {
+        builder.Properties<DateTime>().HaveConversion<UtcDateTimeConverter>();
+        builder.Properties<DateTime?>().HaveConversion<UtcNullableDateTimeConverter>();
+    }
 
     protected override void OnModelCreating(ModelBuilder m)
     {
@@ -81,5 +108,17 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         m.Entity<MessageTargeting>()
             .HasOne(mt => mt.Message).WithOne(msg => msg.Targeting)
             .HasForeignKey<MessageTargeting>(mt => mt.MessageId);
+
+        // Coach — owned by a user; assignable to many teams
+        m.Entity<Coach>()
+            .HasOne(c => c.CreatedBy).WithMany().HasForeignKey(c => c.CreatedById)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        m.Entity<CoachAssignment>().HasKey(ca => new { ca.CoachId, ca.TeamId });
+        m.Entity<CoachAssignment>()
+            .HasOne(ca => ca.Coach).WithMany(c => c.Assignments).OnDelete(DeleteBehavior.Cascade);
+        m.Entity<CoachAssignment>()
+            .HasOne(ca => ca.Team).WithMany().HasForeignKey(ca => ca.TeamId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

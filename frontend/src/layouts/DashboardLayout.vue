@@ -7,12 +7,15 @@ const router = useRouter()
 
 const navLinks = [
   { name: 'Dashboard', path: '/dashboard', icon: '🏠' },
+  { name: 'Teams', path: '/teams', icon: '🏒' },
   { name: 'Roster', path: '/roster', icon: '👥' },
+  { name: 'Coaches', path: '/coaches', icon: '📋' },
   { name: 'Events', path: '/events', icon: '📅' },
   { name: 'Schedules', path: '/schedules', icon: '📋' },
   { name: 'Venues', path: '/venues', icon: '📍' },
   { name: 'Practice Planner', path: '/practice-planner', icon: '🏒' },
   { name: 'League', path: '/league', icon: '🏆' },
+  { name: 'Invitations', path: '/invitations', icon: '✉️' },
 ]
 
 async function handleLogout() {
